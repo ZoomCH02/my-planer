@@ -1,0 +1,30 @@
+# Общие игнорируемые файлы для обоих проектов
+node_modules/
+dist/
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Игнорирование для backend
+red-planner-back-end/node_modules/
+red-planner-back-end/dist/
+red-planner-back-end/*.log
+
+# Игнорирование для frontend
+red-planner-front-end/node_modules/
+red-planner-front-end/.next/
+red-planner-front-end/*.log
+
+# Игнорирование OS/Editor специфичных файлов
+Thumbs.db
+*.tmp
+*.bak
+*.old
+*.orig
+*.lock

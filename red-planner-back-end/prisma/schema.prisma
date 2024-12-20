@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js" // Генерация Prisma Client для JavaScript.
+}
+
+// Datasource configuration for SQLite
+datasource db {
+  provider = "sqlite" // Указывает SQLite как провайдера базы данных.
+  url      = env("DATABASE_URL") // Читает URL подключения из переменной окружения.
+}
+
+// Определение модели User
+model User {
+  id        String   @id @default(cuid()) // Уникальный идентификатор, сгенерированный с помощью CUID.
+  createdAt DateTime @default(now()) @map("created_at") // Дата создания записи.
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления записи.
+
+  name     String // Имя пользователя.
+  email    String @unique // Email пользователя, должен быть уникальным.
+  password String // Пароль пользователя.
+
+  workInterval   Int? @default(50) @map("work_interval") // Длительность рабочего интервала в минутах.
+  breakInterval  Int? @default(10) @map("break_interval") // Длительность перерыва в минутах.
+  intervalsCount Int? @default(7) @map("intervals_count") // Количество рабочих интервалов в одном цикле.
+
+  tasks            Task[] // Связь один-ко-многим с задачами.
+  TimeBlock       TimeBlock[] // Связь с временными блоками.
+  PomodoroSession PomodoroSession[] // Связь с сеансами Pomodoro.
+}
+
+// Определение модели Task
+model Task {
+  id        String   @id @default(cuid()) // Уникальный идентификатор.
+  createdAt DateTime @default(now()) @map("created_at") // Дата создания задачи.
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления задачи.
+
+  name        String // Название задачи.
+  priority    String?  @default("low") @map("priority") // Приоритет задачи: "low", "medium" или "high".
+  isCompleted Boolean? @default(false) @map("is_completed") // Флаг выполнения задачи.
+
+  user   User   @relation(fields: [userId], references: [id]) // Связь задачи с пользователем.
+  userId String @map("user_id") // Внешний ключ для пользователя.
+}
+
+// Определение модели TimeBlock
+model TimeBlock {
+  id        String   @id @default(cuid()) // Уникальный идентификатор.
+  createdAt DateTime @default(now()) @map("created_at") // Дата создания временного блока.
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления временного блока.
+
+  name     String // Название временного блока.
+  color    String? // Цветовая метка временного блока.
+  duration Int // Длительность блока в минутах.
+  order    Int     @default(1) // Порядковый номер блока (по умолчанию 1).
+
+  user   User   @relation(fields: [userId], references: [id]) // Связь блока с пользователем.
+  userId String @map("user_id") // Внешний ключ для пользователя.
+}
+
+// Определение модели PomodoroSession
+model PomodoroSession {
+  id        String   @id @default(cuid()) // Уникальный идентификатор.
+  createdAt DateTime @default(now()) @map("created_at") // Дата создания сеанса Pomodoro.
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления сеанса.
+
+  isCompleted Boolean? @default(false) @map("is_completed") // Флаг завершения сеанса.
+
+  user   User   @relation(fields: [userId], references: [id]) // Связь сеанса с пользователем.
+  userId String @map("user_id") // Внешний ключ для пользователя.
+
+  PomodoroRound PomodoroRound[] // Связь с раундами Pomodoro.
+}
+
+// Определение модели PomodoroRound
+model PomodoroRound {
+  id        String   @id @default(cuid()) // Уникальный идентификатор.
+  createdAt DateTime @default(now()) @map("created_at") // Дата создания раунда.
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления раунда.
+
+  totalSeconds Int // @map("total_seconds") Общее количество секунд, отработанных в раунде.
+  isCompleted  Boolean? @default(false) @map("is_completed") // Флаг завершения раунда.
+
+  pomodoroSession   PomodoroSession @relation(fields: [pomodoroSessionId], references: [id], onDelete: Cascade) // Связь раунда с сеансом.
+  pomodoroSessionId String          @map("pomodoro_session_id") // Внешний ключ для сеанса Pomodoro.
+}
